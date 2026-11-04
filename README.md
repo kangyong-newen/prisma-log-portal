@@ -199,3 +199,65 @@ Example:
 ## Disclaimer
 
 This project is intended for Prisma Access visibility and operational monitoring.
+
+
+
+---
+
+# Change Log
+
+## 2026-11-04
+
+### Added
+
+- Action Filter (Allow / Deny)
+- Source IP Filter
+- Destination IP Filter
+- Destination Port Filter
+- Application Filter
+- User Filter
+- Rule Filter
+- Session Reason Filter
+
+### Added Log Fields
+
+- Source Country
+- Destination Port
+- Outbound Interface
+
+### Added Time Range
+
+- Last 5 Minutes
+- Last 60 Minutes
+- Last 24 Hours
+- Last 7 Days
+
+### Added Session Details
+
+- Action Source
+- Sub Type
+- Session Reason
+- Source / Destination Zone
+- URL Category
+- Protocol
+- Bytes Statistics
+- Packet Statistics
+
+### UI Improvements
+
+- Expandable Session Details
+- Country Flag Display
+- Allow / Deny Badge
+- Last Updated Timestamp
+- Result Limit Selector
+  - 10 Rows
+  - 50 Rows
+  - 100 Rows
+  - 500 Rows
+
+### Backend Improvements
+
+- Dynamic Time Range Query
+- Destination Port Filtering
+- Application Filtering
+- Enhanced Traffic Search

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./App.css";
 
 interface LogEntry {
   time_generated?: number;
@@ -9,11 +10,13 @@ interface LogEntry {
   from_zone?: string;
 
   dest_ip?: string;
+  dest_port?: number;
   to_zone?: string;
 
   protocol?: string;
   app?: string;
   url_category?: string;
+  outbound_if?: string;
 
   action?: string;
   action_source?: string;
@@ -71,11 +74,14 @@ function App() {
 
   const [action, setAction] = useState("deny");
   const [limit, setLimit] = useState(50);
+  const [timeRange, setTimeRange] = useState("60m");
   const [searchIp, setSearchIp] = useState("");
   const [destIp, setDestIp] = useState("");
   const [userFilter, setUserFilter] = useState("");
   const [ruleFilter, setRuleFilter] = useState("");
   const [reasonFilter, setReasonFilter] = useState("");
+  const [destPortFilter, setDestPortFilter] = useState("");
+  const [appFilter, setAppFilter] = useState("");
   const [expandedRow, setExpandedRow] =
     useState<number | null>(null);
 
@@ -87,14 +93,17 @@ function App() {
 
     try {
 	const response = await fetch(
-  	`http://192.168.55.110:28000/api/logs/traffic?` +
+  	`/api/logs/traffic?` +
   	`action=${action}` +
         `&limit=${limit}` +
+	`&time_range=${timeRange}` +
   	`&source_ip=${encodeURIComponent(searchIp)}` +
   	`&dest_ip=${encodeURIComponent(destIp)}` +
   	`&user=${encodeURIComponent(userFilter)}` +
   	`&rule=${encodeURIComponent(ruleFilter)}` +
-  	`&reason=${encodeURIComponent(reasonFilter)}`
+  	`&reason=${encodeURIComponent(reasonFilter)}` +
+	`&dest_port=${encodeURIComponent(destPortFilter)}` +
+	`&app=${encodeURIComponent(appFilter)}`
 );
 
       const data = await response.json();
@@ -116,17 +125,20 @@ function App() {
 
     const timer = setInterval(() => {
       loadLogs();
-    }, 30000);
+    }, 300000);
 
     return () => clearInterval(timer);
 }, [
   action,
   limit,
+  timeRange,
   searchIp,
   destIp,
   userFilter,
   ruleFilter,
   reasonFilter,
+  destPortFilter,
+  appFilter,
 ]);
 
 
@@ -176,6 +188,29 @@ function App() {
     <option value={500}>500 Rows</option>
   </select>
 
+  <select
+  value={timeRange}
+  onChange={(e) =>
+    setTimeRange(e.target.value)
+  }
+>
+  <option value="5m">
+    Last 5 Minutes
+  </option>
+
+  <option value="60m">
+    Last 60 Minutes
+  </option>
+
+  <option value="24h">
+    Last 24 Hours
+  </option>
+
+  <option value="7d">
+    Last 7 Days
+  </option>
+</select>
+
   <input
     type="text"
     placeholder="Source IP"
@@ -191,6 +226,26 @@ function App() {
     onChange={(e) => setDestIp(e.target.value)}
     style={{ padding: "6px" }}
   />
+
+  <input
+  type="text"
+  placeholder="Destination Port"
+  value={destPortFilter}
+  onChange={(e) =>
+    setDestPortFilter(e.target.value)
+  }
+  style={{ padding: "6px" }}
+/>
+
+<input
+  type="text"
+  placeholder="Application"
+  value={appFilter}
+  onChange={(e) =>
+    setAppFilter(e.target.value)
+  }
+  style={{ padding: "6px" }}
+/>
 
   <input
     type="text"
@@ -217,7 +272,7 @@ function App() {
   />
 
   <button onClick={loadLogs}>
-    Refresh
+    Search
   </button>
 </div>
 
@@ -246,7 +301,9 @@ function App() {
               <th>Country</th>
               <th>User</th>
               <th>Destination IP</th>
+	      <th>Destination Port</th>
               <th>App</th>
+	      <th>Outbound IF</th>
               <th>Action</th>
               <th>Rule</th>
               <th>Bytes</th>
@@ -278,7 +335,9 @@ function App() {
                   </td>
                   <td>{log.users}</td>
                   <td>{log.dest_ip}</td>
+		  <td>{log.dest_port}</td>
                   <td>{log.app}</td>
+		  <td>{log.outbound_if}</td>
 
                   <td>
                     <span
@@ -320,6 +379,7 @@ function App() {
                         style={{
                           background:
                             "#ffffff",
+			  color: "#111827",
                           border:
                             "1px solid #e5e7eb",
                           borderRadius:
@@ -340,6 +400,7 @@ function App() {
                           style={{
                             width:
                               "100%",
+			    color: "#111827",
                           }}
                         >
                           <tbody>
@@ -437,22 +498,37 @@ function App() {
                               </td>
                             </tr>
 
-                            <tr>
-                              <td>
-                                <b>Destination IP</b>
-                              </td>
-                              <td>
-                                {log.dest_ip}
-                              </td>
+			    <tr>
+  <td>
+    <b>Destination IP</b>
+  </td>
+  <td>
+    {log.dest_ip}
+  </td>
 
-                              <td>
-                                <b>To Zone</b>
-                              </td>
-                              <td>
-                                {log.to_zone}
-                              </td>
-                            </tr>
+  <td>
+    <b>Destination Port</b>
+  </td>
+  <td>
+    {log.dest_port || "-"}
+  </td>
+</tr>
 
+<tr>
+  <td>
+    <b>Outbound Interface</b>
+  </td>
+  <td>
+    {log.outbound_if || "-"}
+  </td>
+
+  <td>
+    <b>To Zone</b>
+  </td>
+  <td>
+    {log.to_zone}
+  </td>
+</tr>
                             <tr>
                               <td>
                                 <b>Protocol</b>

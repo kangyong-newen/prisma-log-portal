@@ -13,19 +13,30 @@ def get_traffic(
     source_ip: str | None = Query(default=None),
     dest_ip: str | None = Query(default=None),
     user: str | None = Query(default=None),
-    app: str | None = Query(default=None),
     action: str | None = Query(default=None),
     rule: str | None = Query(default=None),
     reason: str | None = Query(default=None),
+    dest_port: str | None = Query(default=None),
+    app: str | None = Query(default=None),
     limit: int = Query(default=50),
+    time_range: str = Query(default="60m"),
 ):
-
     token = PrismaAuth().get_token()["access_token"]
 
     prisma = PrismaClient(token)
 
     now = datetime.now(timezone.utc)
-    start = now - timedelta(hours=1)
+
+    if time_range == "5m":
+        start = now - timedelta(minutes=5)
+    elif time_range == "60m":
+        start = now - timedelta(hours=1)
+    elif time_range == "24h":
+        start = now - timedelta(hours=24)
+    elif time_range == "7d":
+        start = now - timedelta(days=7)
+    else:
+        start = now - timedelta(hours=1)
 
     rules = [
         {
@@ -80,6 +91,15 @@ def get_traffic(
                 "property": "dest_ip.value",
                 "operator": "ip_match_cidr",
                 "values": [f"{dest_ip}/32"],
+            }
+        )
+
+    if dest_port:
+        rules.append(
+            {
+                "property": "dest_port",
+                "operator": "equals",
+                "values": [int(dest_port)],
             }
         )
 
