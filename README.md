@@ -1,5 +1,12 @@
 # Prisma Access Traffic Log Portal
 
+## Dashboard
+
+![allow-dashboard](./docs/allow.png)
+![deny-dashboard](./docs/deny.png)
+
+---
+
 Prisma Access / Cortex Data Lake Traffic Log Viewer
 
 ## Features
