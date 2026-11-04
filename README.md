@@ -125,12 +125,29 @@ backend/.env
 
 Example:
 
+| `CLIENT_ID` / `CLIENT_SECRET` | 서비스 계정 자격증명 | SCM → Settings → Identity & Access → Service Account 생성 |
+| `TSG_ID` | Tenant Service Group ID (숫자) | SCM 테넌트 정보 |
+| `LS_TENANT` | Strata Logging Service 테넌트(인스턴스) ID | Log Viewer 요청 헤더 `prisma-tenant`의 `:` 뒤쪽 값 (HAR로 확인) |
+| `REGION` | Prisma Access API 리전 (예: `jp01`) | Log Viewer 요청 URL의 `pa-<region>` 부분 (HAR로 확인) |
+
 ```env
-CLIENT_ID=
-CLIENT_SECRET=
-TSG_ID=
-AUTH_URL=
-CDL_URL=
+# Prisma Access Service Account
+
+CLIENT_ID=xxxxxx@xxxxx.iam.panserviceaccount.com
+CLIENT_SECRET=xxxxxxxx
+
+# Tenant Service Group ID
+TSG_ID=xxxxxxx
+
+# Logging Service Tenant
+LS_TENANT=xxxx
+
+# Prisma Access Region
+REGION=sg01
+
+# Redis
+
+REDIS_HOST=redis
 ```
 
 ---
