@@ -1,0 +1,297 @@
+import React, { useEffect, useState } from "react";
+
+interface LogEntry {
+  time_generated?: number;
+
+  source_ip?: string;
+  source_location?: string;
+  users?: string;
+  from_zone?: string;
+
+  dest_ip?: string;
+  to_zone?: string;
+
+  protocol?: string;
+  app?: string;
+  url_category?: string;
+
+  action?: string;
+  action_source?: string;
+
+  rule_matched?: string;
+  sub_type?: string;
+  session_end_reason?: string;
+
+  bytes_total?: number;
+  bytes_received?: number;
+  bytes_sent?: number;
+
+  packets_total?: number;
+  packets_received?: number;
+  packets_sent?: number;
+}
+
+const formatTime = (timestamp?: number) => {
+  if (!timestamp) return "-";
+  return new Date(timestamp / 1000).toLocaleString("ko-KR");
+};
+
+const formatBytes = (bytes?: number) => {
+  if (!bytes) return "0 B";
+
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  }
+
+  if (bytes >= 1024) {
+    return `${(bytes / 1024).toFixed(2)} KB`;
+  }
+
+  return `${bytes} B`;
+};
+
+function App() {
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [action, setAction] = useState("deny");
+  const [searchIp, setSearchIp] = useState("");
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+
+  const loadLogs = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://192.168.55.110:28000/api/logs/traffic?action=${action}`
+      );
+
+      const data = await response.json();
+      setLogs(data.logs || []);
+    } catch (error) {
+      console.error("Failed to load logs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadLogs();
+
+    const timer = setInterval(() => {
+      loadLogs();
+    }, 30000);
+
+    return () => clearInterval(timer);
+  }, [action]);
+
+  const filteredLogs = logs.filter((log) =>
+    log.source_ip?.includes(searchIp)
+  );
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>Prisma Access Traffic Logs</h1>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "20px",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <select
+          value={action}
+          onChange={(e) => setAction(e.target.value)}
+        >
+          <option value="deny">DENY</option>
+          <option value="allow">ALLOW</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="Source IP Search"
+          value={searchIp}
+          onChange={(e) => setSearchIp(e.target.value)}
+          style={{ padding: "6px" }}
+        />
+
+        <button onClick={loadLogs}>
+          Refresh
+        </button>
+      </div>
+
+      {loading && (
+        <div style={{ marginBottom: "10px" }}>
+          Refreshing...
+        </div>
+      )}
+
+      <div style={{ overflowX: "auto" }}>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+          }}
+        >
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Source IP</th>
+              <th>Country</th>
+              <th>User</th>
+              <th>Destination IP</th>
+              <th>App</th>
+              <th>Action</th>
+              <th>Rule</th>
+              <th>Bytes</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredLogs.map((log, idx) => (
+              <React.Fragment key={idx}>
+                <tr
+                  onClick={() =>
+                    setExpandedRow(
+                      expandedRow === idx ? null : idx
+                    )
+                  }
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <td>{formatTime(log.time_generated)}</td>
+                  <td>{log.source_ip}</td>
+                  <td>{log.source_location}</td>
+                  <td>{log.users}</td>
+                  <td>{log.dest_ip}</td>
+                  <td>{log.app}</td>
+
+                  <td
+                    style={{
+                      color:
+                        log.action === "deny"
+                          ? "red"
+                          : "green",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {log.action}
+                  </td>
+
+                  <td>{log.rule_matched}</td>
+                  <td>{formatBytes(log.bytes_total)}</td>
+                  <td>{log.session_end_reason}</td>
+                </tr>
+
+                {expandedRow === idx && (
+                  <tr>
+                    <td colSpan={10}>
+                      <div
+                        style={{
+                          background: "#f8f9fa",
+                          border: "1px solid #ddd",
+                          padding: "15px",
+                          margin: "5px 0",
+                        }}
+                      >
+                        <h3>Session Details</h3>
+
+                        <table style={{ width: "100%" }}>
+                          <tbody>
+                            <tr>
+                              <td><b>Time</b></td>
+                              <td>{formatTime(log.time_generated)}</td>
+                              <td><b>Action</b></td>
+                              <td>{log.action}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Rule</b></td>
+                              <td>{log.rule_matched}</td>
+                              <td><b>Action Source</b></td>
+                              <td>{log.action_source}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Sub Type</b></td>
+                              <td>{log.sub_type}</td>
+                              <td><b>Session Reason</b></td>
+                              <td>{log.session_end_reason}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Source IP</b></td>
+                              <td>{log.source_ip}</td>
+                              <td><b>Source Country</b></td>
+                              <td>{log.source_location}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>User</b></td>
+                              <td>{log.users}</td>
+                              <td><b>From Zone</b></td>
+                              <td>{log.from_zone}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Destination IP</b></td>
+                              <td>{log.dest_ip}</td>
+                              <td><b>To Zone</b></td>
+                              <td>{log.to_zone}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Protocol</b></td>
+                              <td>{log.protocol}</td>
+                              <td><b>Application</b></td>
+                              <td>{log.app}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>URL Category</b></td>
+                              <td>{log.url_category}</td>
+                              <td><b>Total Bytes</b></td>
+                              <td>{formatBytes(log.bytes_total)}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Bytes Sent</b></td>
+                              <td>{formatBytes(log.bytes_sent)}</td>
+                              <td><b>Bytes Received</b></td>
+                              <td>{formatBytes(log.bytes_received)}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Total Packets</b></td>
+                              <td>{log.packets_total}</td>
+                              <td><b>Packets Sent</b></td>
+                              <td>{log.packets_sent}</td>
+                            </tr>
+
+                            <tr>
+                              <td><b>Packets Received</b></td>
+                              <td>{log.packets_received}</td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+export default App;

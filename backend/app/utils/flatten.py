@@ -1,0 +1,14 @@
+def extract_value(v):
+    if isinstance(v, dict):
+        return v.get("value", "")
+
+    return v
+
+
+def flatten_log(log):
+    result = {}
+
+    for k, v in log.items():
+        result[k] = extract_value(v)
+
+    return result

@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+    container_name: prisma-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - "28000:28000"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: prisma-frontend
+    restart: unless-stopped
+    ports:
+      - "30000:30000"
+
+  redis:
+    image: redis:7-alpine
+    container_name: prisma-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
