@@ -125,28 +125,17 @@ function App() {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
+
+  loadLogs();
+
+  const timer = setInterval(() => {
     loadLogs();
+  }, 300000);
 
-    const timer = setInterval(() => {
-      loadLogs();
-    }, 300000);
+  return () => clearInterval(timer);
 
-    return () => clearInterval(timer);
-}, [
-  action,
-  limit,
-  timeRange,
-  searchIp,
-  destIp,
-  userFilter,
-  ruleFilter,
-  reasonFilter,
-  destPortFilter,
-  appFilter,
-  domainFilter,
-]);
-
+}, []);
 
   const filteredLogs = logs.filter((log) =>
     log.source_ip?.includes(searchIp)

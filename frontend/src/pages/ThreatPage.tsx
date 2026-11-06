@@ -152,37 +152,18 @@ export default function ThreatPage() {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
 
+  loadLogs();
+
+  const timer = setInterval(() => {
     loadLogs();
+  }, 300000);
 
-    const timer =
-      setInterval(
-        loadLogs,
-        300000
-      );
+  return () => clearInterval(timer);
 
-    return () =>
-      clearInterval(timer);
+}, []);
 
-  }, [
-    action,
-    severity,
-    threatName,
-    ruleFilter,
-    sourceIp,
-    destIp,
-    destPort,
-    userFilter,
-    appFilter,
-    directionFilter,
-    fileNameFilter,
-    fileTypeFilter,
-    verdictFilter,
-    urlDomainFilter,
-    limit,
-    timeRange,
-  ]);
 
   return (
 

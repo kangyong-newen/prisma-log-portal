@@ -119,26 +119,18 @@ function App() {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
+
+  loadLogs();
+
+  const timer = setInterval(() => {
     loadLogs();
+  }, 300000);
 
-    const timer = setInterval(() => {
-      loadLogs();
-    }, 300000);
+  return () => clearInterval(timer);
 
-    return () => clearInterval(timer);
-}, [
-  action,
-  limit,
-  timeRange,
-  searchIp,
-  destIp,
-  userFilter,
-  ruleFilter,
-  reasonFilter,
-  destPortFilter,
-  appFilter,
-]);
+}, []);
+
 
 
   const filteredLogs = logs.filter((log) =>
