@@ -213,7 +213,8 @@ This project is intended for Prisma Access visibility and operational monitoring
 
 # Change Log
 
-## 2026-11-04
+<details>
+<summary>2026-11-04</summary>
 
 ### Added
 
@@ -268,3 +269,26 @@ This project is intended for Prisma Access visibility and operational monitoring
 - Destination Port Filtering
 - Application Filtering
 - Enhanced Traffic Search
+
+<details>
+<summary>2026-11-06</summary>
+
+- Added Traffic logs
+- Added URL logs
+- Added Threat logs
+- Added Threat filtering
+- Added Time Range selector
+- Added Row limits
+- Added Auto refresh
+
+</details>
+
+<details>
+<summary>2026-11-05</summary>
+
+- Initial project setup
+- Docker Compose
+- FastAPI
+- React
+
+</details>
