@@ -269,6 +269,7 @@ This project is intended for Prisma Access visibility and operational monitoring
 - Destination Port Filtering
 - Application Filtering
 - Enhanced Traffic Search
+</details>
 
 <details>
 <summary>2026-11-06</summary>
